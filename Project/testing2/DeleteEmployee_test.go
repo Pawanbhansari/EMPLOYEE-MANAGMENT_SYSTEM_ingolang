@@ -12,25 +12,6 @@ import (
 	"testing"
 )
 
-//package testing2
-//
-//import (
-//"Project/main/functions"
-//"database/sql"
-//"github.com/DATA-DOG/go-sqlmock"
-//"github.com/gin-gonic/gin"
-//"github.com/stretchr/testify/assert"
-//"net/http"
-//"net/http/httptest"
-//"testing"
-//"strconv"
-//)
-
-// Mock the database connection
-//var db *sql.DB
-//var mock sqlmock.Sqlmock
-//var repo *functions.Repo
-
 func init() {
 	var err error
 	db, mock, err = sqlmock.New()

@@ -1,8 +1,10 @@
 package Employee
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -17,6 +19,24 @@ type Employee struct {
 	ManagerID *int   `json:"manager_id" db:"MANAGER_ID"`
 }
 
+func (e *Employee) UnmarshalJSON(data []byte) error {
+	type Alias Employee
+	aux := &struct {
+		*Alias
+		Phone string `json:"phone"`
+	}{
+		Alias: (*Alias)(e),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	phone, err := strconv.ParseInt(aux.Phone, 10, 64)
+	if err != nil {
+		return err
+	}
+	e.Phone = phone
+	return nil
+}
 func (e Employee) String() string {
 	empStr := fmt.Sprintf("Employee[ID: %d, Name: %s, Email: %s, Phone: %s, Address: %s, DOB: %s,DepartmentID: %d, ManagerID: %d]",
 		e.EmpID, e.Name, e.Email, e.Phone, e.Address, e.DOB, *e.DeptID, *e.ManagerID)
@@ -82,25 +102,6 @@ type HR struct {
 	HR_ID int `json:"hr_id" db:"HR_ID"`
 }
 
-//	func (hr *HR) ApproveLeave(leave *Leave) error {
-//		if leave.Approval_status == true {
-//			return errors.New(fmt.Sprintf("\n Leave has already been approved for : %d days by %v id: %d", leave.NoOfDays(), hr.Name, hr.EmpID))
-//		}
-//		leave.Approval_status = true
-//		leave.ApprovedBy = &hr.EmpID
-//		fmt.Printf("\n Leave approved for : %d days\n", leave.NoOfDays())
-//
-//		return nil
-//	}
-//
-//	func (hr *HR) RejectLeave(leave *Leave) error {
-//		if leave.Approval_status != true {
-//			return errors.New("\n Leave has already been rejected")
-//		}
-//		leave.Approval_status = false
-//		leave.ApprovedBy = nil
-//		return nil
-//	}
 func (hr *HR) ApproveLeave(leave *Leave) error {
 	if leave.Approval_status != nil && *leave.Approval_status == true {
 		return errors.New(fmt.Sprintf("\n Leave has already been approved for : %d days by %v id: %d", leave.NoOfDays(), hr.Name, hr.EmpID))
@@ -146,11 +147,3 @@ func (leave *Leave) NoOfDays() int {
 	//totalLeaves := int(leave.EndDate.Sub(leave.StartDate).Hours()/24) + 1
 	return totalLeaves
 }
-
-//func SetupRouter() *gin.Engine {
-//	router := gin.Default()
-//
-//	// Define all your routes here
-//
-//	return router
-//}
